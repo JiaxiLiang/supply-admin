@@ -85,7 +85,7 @@ interface MockUser {
 }
 
 const USERS: MockUser[] = [
-  { id: 1, username: 'admin', password: '123456', nickName: '李管理', avatar: avatarAdmin, roles: [{ id: 1, code: 'SUPER_ADMIN' }, { id: 2, code: 'SALESMAN' }] },
+  { id: 1, username: 'admin', password: '123456', nickName: '梁管理', avatar: avatarAdmin, roles: [{ id: 1, code: 'SUPER_ADMIN' }, { id: 2, code: 'SALESMAN' }] },
   { id: 2, username: 'sale', password: '123456', nickName: '张晓雨', avatar: avatarSale, roles: [{ id: 2, code: 'SALESMAN' }] },
 ]
 
@@ -222,7 +222,7 @@ const QUOTATIONS: Quotation[] = [
     remark: '客户已回签 PI',
     status: 'confirmed',
     createdBy: 1,
-    creatorName: '李管理',
+    creatorName: '梁管理',
     createTime: '2026-10-15 09:12:00',
     items: [{ id: 2, productId: 1, skuId: 2, styleNo: 'CT-8001', title: '法式泡泡袖连衣裙', color: '米白', size: 'L', cost: 6300, unitPrice: 1380, quantity: 800 }],
   },
