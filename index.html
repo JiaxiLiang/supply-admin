@@ -6,14 +6,12 @@
     <link rel="icon" href="/favicon.svg" />
     <title>%VITE_TITLE%</title>
     <script>
-      // 首屏防白闪（FOUC）：与 store 的 useDark({ initialValue: 'dark' }) 同一口径——
-      // 无本地记录默认暗色；用户显式切换过则以其记录为准（auto 跟随系统）。
-      // 必须在 Vue 挂载前同步执行，把 dark 类提前打到 <html> 上
+      // 首屏防闪烁（FOUC）：与 store 的 useDark({ initialValue: 'light' }) 同一口径——
+      // 无本地记录默认亮色；用户显式切换过则以其记录为准（auto 跟随系统）。
+      // 必须在 Vue 挂载前同步执行，暗色用户把 dark 类提前打到 <html> 上
       try {
         var stored = localStorage.getItem('vueuse-color-scheme')
-        var dark = stored
-          ? stored === 'dark' || (stored === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-          : true
+        var dark = stored === 'dark' || (stored === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
         if (dark) document.documentElement.classList.add('dark')
       } catch (e) {}
     </script>
@@ -25,12 +23,12 @@
         width: 100%;
         height: 100%;
         display: flex;
-        background-color: #232324;
-        color: rgba(255, 255, 255, 0.9);
-      }
-      html:not(.dark) .loading-container {
         background-color: #fff;
         color: rgb(51, 54, 57);
+      }
+      .dark .loading-container {
+        background-color: #232324;
+        color: rgba(255, 255, 255, 0.9);
       }
 
       .loading-container .loading {

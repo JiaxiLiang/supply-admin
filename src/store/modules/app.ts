@@ -23,8 +23,8 @@ export const useAppStore = defineStore('app', {
   // state 用工厂函数：每次初始化都生成全新对象，避免多实例共享同一引用
   state: (): AppState => ({
     collapsed: false,
-    // 首次访问默认暗色（演示/深度工作场景主口径）；用户显式切换后由 localStorage 记忆，此后跟随其选择
-    isDark: useDark({ initialValue: 'dark' }),
+    // 首次访问默认亮色；用户显式切换到暗色后由 localStorage 记忆，此后跟随其选择
+    isDark: useDark({ initialValue: 'light' }),
     primaryColor: defaultPrimaryColor,
     naiveThemeOverrides,
   }),
@@ -37,7 +37,7 @@ export const useAppStore = defineStore('app', {
     setCollapsed(b: boolean) {
       this.collapsed = b
     },
-    /** 切换明暗模式（首次进入默认暗色，显式切换后记忆到 localStorage） */
+    /** 切换明暗模式（首次进入默认亮色，显式切换后记忆到 localStorage） */
     toggleDark() {
       this.isDark = !this.isDark
     },
