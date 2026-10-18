@@ -14,18 +14,10 @@
 
       <footer class="mt-16 flex items-center gap-12 md:ml-auto md:mt-0">
         <n-button
-          class="!border-white/60 !bg-transparent !text-white hover:!bg-white/15"
-          tag="a"
-          href="https://isme.top"
-          target="__blank"
-        >
-          开发文档
-        </n-button>
-        <n-button
           class="!bg-white !text-#23C891 hover:!opacity-90"
           tag="a"
-          href="https://github.com/zclzone/vue-naive-admin/tree/2.x"
-          target="__blank"
+          href="https://github.com/Jiaxiliang/vue-naive-admin"
+          target="_blank"
         >
           代码仓库
         </n-button>
@@ -34,16 +26,6 @@
 
     <div class="mt-12 flex">
       <n-card class="w-50%" title="💯 特性" segmented>
-        <template #header-extra>
-          <a
-            class="text-highlight text-14 text-primary hover:underline hover:opacity-80"
-            href="https://isme.top"
-            target="_blank"
-          >
-            isme.top
-          </a>
-        </template>
-
         <p class="opacity-60">
           这是跨境供应链管理系统的前端：基于权限动态路由，覆盖商品、报价单、PI 打印的采购报价业务流；
           使用 Vite + Vue3 + TypeScript + Pinia + Unocss 构建，配套 Nestjs + TypeOrm + MySql 后端；
@@ -84,11 +66,7 @@
 
         <n-divider class="mb-0! mt-12!">
           <p class="text-14 opacity-60">
-            👉点击
-            <b class="mx-2 transition hover:text-primary">
-              <a href="https://isme.top" target="_blank">更多</a>
-            </b>
-            查看更多实用功能，持续开发中...
+            演示环境由内置 mock 驱动，刷新即复位；完整架构说明见仓库 README 与 docs/
           </p>
         </n-divider>
       </n-card>
