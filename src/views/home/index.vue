@@ -16,7 +16,7 @@
         <n-button
           class="!bg-white !text-#23C891 hover:!opacity-90"
           tag="a"
-          href="https://github.com/Jiaxiliang/vue-naive-admin"
+          href="https://github.com/JiaxiLiang/supply-admin"
           target="_blank"
         >
           代码仓库

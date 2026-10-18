@@ -13,7 +13,7 @@
 
       <i
         class="i-fe:github mr-16 cursor-pointer transition hover:text-primary"
-        @click="handleLinkClick('https://github.com/Jiaxiliang/vue-naive-admin')"
+        @click="handleLinkClick('https://github.com/JiaxiLiang/supply-admin')"
       />
 
       <ThemeSetting class="mr-16" />
