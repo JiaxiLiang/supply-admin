@@ -1,7 +1,5 @@
 # 跨境供应链管理系统
 
-📐 **[项目架构图全集（14 张 · 基于源码重绘）](docs/arch-overview.md)** · [整体分层架构图（可视化 HTML）](docs/architecture.html) · [Mermaid 源码](docs/architecture.md) · [CRUD 模块架构图](docs/module-architecture.md)
-
 ## 业务模块（跨境电商供应链演示）
 
 在权限系统底座上新增两个业务模块，定位为「跨境电商供应链管理系统（Web 管理端）」：
@@ -243,3 +241,7 @@ pnpm build        # 产物构建
 - `src/utils/http/index.ts`：`request = createAxios() as unknown as HttpClient`——axios 方法级泛型无法表达"响应拦截器改写响应体"这一运行时事实，以自封装 HttpClient 收口
 - `src/main.ts`：`setupNaiveDiscreteApi` 的 configProviderProps——naive-ui `GlobalThemeOverrides` 与 `ConfigProviderProps['themeOverrides']` 深层型变不兼容（官方已知类型缺陷）
 - `src/router/guards/permission-guard.ts`：`{ ...to, replace: true } as RouteLocationRaw`——vue-router 的 RouteLocationRaw 不接受 RouteLocationNormalized 展开（官方类型缺口）
+
+## 项目来源与致谢
+
+本系统的权限底座（动态路由权限、请求封装、布局体系）基于开源项目 [zclzone/vue-naive-admin](https://github.com/zclzone/vue-naive-admin)（MIT License，原作者 Ronnie Zhang/大脸怪）二次开发，该部分设计与代码版权归原作者所有；业务模块（商品管理、报价单管理）、mock 演示层、UI 视觉与工程化改造为本人独立设计与实现，详见上方各节。
