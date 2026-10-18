@@ -1,5 +1,5 @@
 <template>
-  <main class="h-full flex-col flex-1 overflow-hidden bg-#f5f6fb dark:bg-#121212">
+  <main class="h-full flex-col flex-1 overflow-hidden bg-#f7f7f7 dark:bg-#121212">
     <!-- 顶栏：header 插槽可整体替换，否则渲染「返回 + 标题（缺省取路由 meta.title）+ action」默认结构 -->
     <AppCard
       v-if="showHeader"

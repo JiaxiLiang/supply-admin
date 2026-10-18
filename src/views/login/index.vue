@@ -1,9 +1,9 @@
 <template>
   <div class="login-bg wh-full flex-col">
-    <div class="m-auto max-w-700 min-w-345 f-c-c rounded-8 bg-white/86 p-12 backdrop-blur-14px card-shadow dark:bg-#18181c/86">
-      <div class="hidden w-380 flex-col items-center justify-center rounded-8 from-#2F54EB/8 to-#13C2C2/14 bg-gradient-to-br px-20 py-35 md:flex">
+    <div class="m-auto max-w-700 min-w-345 f-c-c rounded-8 bg-white/86 p-12 backdrop-blur-14px card-shadow dark:bg-#1a2622/86">
+      <div class="hidden w-380 flex-col items-center justify-center rounded-8 from-#23C891/10 to-#FECDA4/18 bg-gradient-to-br px-20 py-35 md:flex">
         <h2 class="brand-gradient-text text-40 font-bold">
-          Vue Naive Admin
+          跨境供应链管理系统
         </h2>
         <p class="mt-12 text-15 opacity-60">
           轻量 · 高效 · 开箱即用的后台解决方案
@@ -12,7 +12,7 @@
 
       <div class="login-form w-320 flex-col px-20 py-32">
         <h2 class="f-c-c text-24 text-#6a6a6a font-normal dark:text-white">
-          <img src="@/assets/images/logo.png" class="mr-12 h-50">
+          <img src="@/assets/images/logo.svg" class="mr-12 h-50">
           {{ title }}
         </h2>
         <n-input
@@ -97,16 +97,13 @@
 
 <style>
 .login-bg {
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 15%, rgb(47 84 235 / 14%), transparent),
-    radial-gradient(ellipse 50% 45% at 85% 80%, rgb(19 194 194 / 12%), transparent),
-    linear-gradient(125deg, #eef2ff, #f4f9f8 48%, #eef3ff);
+  background: #f7f7f7;
 }
 .dark .login-bg {
-  background: linear-gradient(125deg, #101014, #121a26 55%, #0e1420);
+  background: linear-gradient(125deg, #111815, #14201c 55%, #0f1513);
 }
 .login-btn {
-  background: linear-gradient(90deg, #2f54eb, #13c2c2) !important;
+  background: linear-gradient(90deg, #23c891, #91e3c8) !important;
   border: none !important;
 }
 .login-form > * {
@@ -149,10 +146,15 @@ const loginInfo = ref({
   captcha: '',
 })
 
-// 验证码图片地址：带时间戳绕过浏览器缓存，节流 500ms 防止频繁刷新
+// 验证码图片地址：mock 模式为接口下发的 SVG 数据 URL，真实后端为直连地址（均带时间戳语义防缓存）；
+// 节流 500ms 防止频繁刷新
 const captchaUrl = ref('')
 const initCaptcha = throttle(() => {
-  captchaUrl.value = `${import.meta.env.VITE_AXIOS_BASE_URL}/auth/captcha?${Date.now()}`
+  api.getCaptchaUrl()
+    .then((url) => {
+      captchaUrl.value = url
+    })
+    .catch(console.error)
 }, 500)
 
 // 回填"记住我"保存的账号密码，并初始化验证码

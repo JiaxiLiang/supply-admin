@@ -18,7 +18,6 @@
 // 侧边菜单：渲染权限菜单树（permissionStore.menus，节点 path 即路由地址），点击即路由跳转；跳转后的页面缓存由路由 meta.keepAlive 经页签机制进入 App.vue 的 KeepAlive 名单，菜单本身不参与缓存
 import type { MenuOption } from 'naive-ui'
 import { useAppStore, usePermissionStore } from '@/store'
-import { isExternal } from '@/utils'
 
 const router = useRouter()
 const route = useRoute()
@@ -35,30 +34,11 @@ watch(route, async () => {
   menu.value?.showOption()
 })
 
-/** 菜单点击：外链让用户选新窗口或站内 iframe 打开，普通项直接按 path 跳转 */
+/** 菜单点击：按 path 路由跳转；目录项（path 为空）不响应 */
 function handleMenuSelect(key: string, item: MenuOption | null) {
-  // 菜单项是 MenuItem（PermissionItem 派生），originPath/path 为字符串字段（MenuOption 索引签名上是 unknown）
-  const originPath = item?.originPath as string | undefined
-  if (isExternal(originPath)) {
-    $dialog.confirm({
-      type: 'info',
-      title: `请选择打开方式`,
-      positiveText: '外链打开',
-      negativeText: '在本站内嵌打开',
-      confirm() {
-        window.open(originPath)
-      },
-      cancel: () => {
-        // 外链菜单的 path 已被 generateRoute 改写为 /iframe/xxx（此时必有值）
-        router.push(item?.path as string)
-      },
-    })
-  }
-  else {
-    if (!item?.path)
-      return
-    router.push(item?.path)
-  }
+  if (!item?.path)
+    return
+  router.push(item.path)
 }
 </script>
 

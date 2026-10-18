@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_AXIOS_BASE_URL: string
   /** 开发环境接口代理目标 */
   readonly VITE_PROXY_TARGET: string
+  /** 是否启用 mock 适配器（'true' | 'false'）：true 时请求由内存 mock 路由表应答 */
+  readonly VITE_USE_MOCK: string
 }
 
 interface ImportMeta {

@@ -61,15 +61,6 @@
           </template>
           <n-select v-model:value="modalForm.icon" :options="iconOptions" clearable filterable />
         </n-form-item-gi>
-        <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="12" path="layout">
-          <template #label>
-            <QuestionLabel
-              label="layout"
-              content="对应layouts文件夹下的目录名, 为空则默认为 default"
-            />
-          </template>
-          <n-select v-model:value="modalForm.layout" :options="layoutOptions" clearable />
-        </n-form-item-gi>
         <n-form-item-gi v-if="modalForm.type === 'MENU'" :span="24" path="component">
           <template #label>
             <QuestionLabel
@@ -152,7 +143,7 @@
 
 <script setup lang="ts">
 // 资源新增/编辑弹窗：统一处理菜单（MENU，含目录级）与按钮权限点（BUTTON）两种资源的表单；
-// 菜单可配路由/组件/图标/layout 等前端路由属性，按钮仅归属某菜单（parentId）作为授权粒度
+// 菜单可配路由/组件/图标等前端路由属性，按钮仅归属某菜单（parentId）作为授权粒度
 import type { TreeSelectOption } from 'naive-ui'
 import type { ModalAction } from '@/composables'
 import type { ModalOptions } from '@/types/me-components'
@@ -186,13 +177,6 @@ const iconOptions = icons.map(item => ({
     h('span', { class: 'flex items-center' }, [h('i', { class: `${item} text-18 mr-8` }), item]),
   value: item,
 }))
-const layoutOptions = [
-  { label: '跟随系统', value: '' },
-  { label: '简约-simple', value: 'simple' },
-  { label: '通用-normal', value: 'normal' },
-  { label: '全面-full', value: 'full' },
-  { label: '空白-empty', value: 'empty' },
-]
 const required = {
   required: true,
   message: '此为必填项',
@@ -200,7 +184,7 @@ const required = {
 }
 
 // 新增时的字段默认值：菜单默认启用且显示
-const defaultForm = { enable: true, show: true, layout: '' }
+const defaultForm = { enable: true, show: true }
 const [modalFormRef, modalForm, validation] = useForm<Partial<PermissionItem>>({})
 const [modalRef, okLoading] = useModal()
 

@@ -1,9 +1,27 @@
-# 1-vue-naive-admin
+# 跨境供应链管理系统
 
 📐 **[项目架构图全集（14 张 · 基于源码重绘）](docs/arch-overview.md)** · [整体分层架构图（可视化 HTML）](docs/architecture.html) · [Mermaid 源码](docs/architecture.md) · [CRUD 模块架构图](docs/module-architecture.md)
 
+## 业务模块（跨境电商供应链演示）
+
+在权限系统底座上新增两个业务模块，定位为「跨境电商供应链管理系统（Web 管理端）」：
+
+| 模块       | 路由              | 能力                                                                                                                                                                                                  |
+| ---------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 商品管理   | `/prod/product`   | SPU 列表（筛选同步 URL / 上架开关 / 导出）、编辑弹窗内以 **规格矩阵**（颜色 × 尺码笛卡尔积）维护 SKU，成本以「分」存储                                                                                |
+| 报价单管理 | `/sale/quotation` | 报价台账（状态标签/多币种/导出）、详情页（选品带入快照、行内改价、**毛利实时联动**、低于成本整行红字）、**状态机**（草稿→已发送→已确认/已作废，发送后整单只读）、**PI 打印**（A4 形式发票，可存 PDF） |
+
+**演示账号**（mock 模式下双账号演示行级数据权限）：
+
+| 账号    | 密码     | 角色                           | 数据范围           |
+| ------- | -------- | ------------------------------ | ------------------ |
+| `admin` | `123456` | 超级管理员（可切换业务员身份） | 全部报价单         |
+| `sale`  | `123456` | 业务员                         | 仅本人创建的报价单 |
+
+**mock 层**：`VITE_USE_MOCK='true'`（默认开）时请求由内存 mock 适配器应答（`src/mock/`，覆盖登录/权限树/两个业务模块/系统管理接口），拦截器链路不变；改为 `'false'` 即恢复真实后端（NestJS）。业务扩展方式：**新增页面零路由代码**——路由与菜单由权限数据驱动（`src/mock/permissions.ts`，路由 name 即权限 code），页面级状态不进 Pinia（与既有 CRUD 页一致，页面自持 + useRequest）。
+
 ```
-1-vue-naive-admin
+跨境供应链管理系统
 ├─ .editorconfig
 ├─ .env
 ├─ .env.development
@@ -64,7 +82,6 @@
 │  │  └─ index.ts
 │  ├─ layouts
 │  │  ├─ components
-│  │  │  ├─ BeginnerGuide.vue
 │  │  │  ├─ BreadCrumb.vue
 │  │  │  ├─ Fullscreen.vue
 │  │  │  ├─ index.ts
@@ -78,23 +95,24 @@
 │  │  │  └─ UserAvatar.vue
 │  │  ├─ empty
 │  │  │  └─ index.vue
-│  │  ├─ full
-│  │  │  ├─ header
-│  │  │  │  └─ index.vue
-│  │  │  ├─ index.vue
-│  │  │  └─ sidebar
-│  │  │     └─ index.vue
 │  │  ├─ normal
 │  │  │  ├─ header
 │  │  │  │  └─ index.vue
 │  │  │  ├─ index.vue
 │  │  │  └─ sidebar
 │  │  │     └─ index.vue
-│  │  └─ simple
-│  │     ├─ index.vue
-│  │     └─ sidebar
-│  │        └─ index.vue
 │  ├─ main.ts
+│  ├─ mock（mock 层：axios 适配器 + 内存路由表 + 双账号权限树，VITE_USE_MOCK 开关）
+│  │  ├─ base.ts（路由契约 / MockError / token 编解码）
+│  │  ├─ db.ts（种子数据：商品 / 报价单 / 演示账号）
+│  │  ├─ index.ts（适配器总装：路由匹配 → ApiResult 应答）
+│  │  ├─ permissions.ts（按角色下发的权限树，新增页面只改这里）
+│  │  └─ routes
+│  │     ├─ auth.ts
+│  │     ├─ catalog.ts（商品 + 选品接口）
+│  │     ├─ index.ts
+│  │     ├─ quotation.ts（状态机守卫 + 金额聚合）
+│  │     └─ system.ts（用户 / 角色 / 权限资源）
 │  ├─ router
 │  │  ├─ basic-routes.ts（satisfies RouteRecordRaw[]）
 │  │  ├─ guards
@@ -136,17 +154,12 @@
 │  │  │  └─ interceptors.ts（全链路 unknown 收窄）
 │  │  ├─ index.ts
 │  │  ├─ is.ts
+│  │  ├─ money.ts（金额纯工具：分↔元、汇率乘法、多币种格式化、毛利率）
 │  │  ├─ naiveTools.ts
 │  │  └─ storage
 │  │     ├─ index.ts
 │  │     └─ storage.ts（get 函数重载 + StoredEnvelope）
 │  └─ views
-│     ├─ base
-│     │  ├─ index.vue
-│     │  ├─ keep-alive.vue
-│     │  ├─ test-modal.vue
-│     │  ├─ unocss-icon.vue
-│     │  └─ unocss.vue
 │     ├─ demo
 │     │  └─ upload
 │     │     └─ index.vue
@@ -155,11 +168,16 @@
 │     │  └─ 404.vue
 │     ├─ home
 │     │  └─ index.vue
-│     ├─ iframe
-│     │  └─ index.vue
 │     ├─ login
 │     │  ├─ api.ts
 │     │  └─ index.vue
+│     ├─ prod
+│     │  └─ product
+│     │     ├─ api.ts
+│     │     ├─ components
+│     │     │  └─ SpecMatrix.vue（规格矩阵：颜色 × 尺码笛卡尔积，已录成本保留）
+│     │     ├─ index.vue
+│     │     └─ model.ts（表格行/列扩展类型 + buildSkuMatrix 纯函数）
 │     ├─ pms
 │     │  ├─ resource
 │     │  │  ├─ api.ts
@@ -175,19 +193,23 @@
 │     │  └─ user
 │     │     ├─ api.ts
 │     │     └─ index.vue
-│     └─ profile
-│        ├─ api.ts
-│        └─ index.vue
-├─ tests（vitest：镜像 src 结构；*.test-d.ts 为类型测试）
-│  ├─ composables
-│  ├─ store
-│  ├─ types
-│  └─ utils
+│     ├─ profile
+│     │  ├─ api.ts
+│     │  └─ index.vue
+│     └─ sale
+│        └─ quotation
+│           ├─ api.ts
+│           ├─ components
+│           │  ├─ PiPrintTemplate.vue（A4 形式发票模板）
+│           │  ├─ QuotationItemTable.vue（明细行编辑表格：行内改价/数量、低于成本红字）
+│           │  └─ SkuPickerModal.vue（选品弹窗：SKU 维度勾选带入快照）
+│           ├─ detail.vue（新建/详情共用：状态机门控 + 毛利实时联动）
+│           ├─ index.vue（报价台账列表）
+│           ├─ model.ts（状态机迁移表 + 金额聚合纯函数）
+│           └─ print.vue（PI 打印页，empty 整屏布局）
 ├─ tsconfig.json（应用源码工程，strict 全开 + noUncheckedIndexedAccess）
 ├─ tsconfig.node.json（构建工具链工程：vite/uno/eslint/build）
-├─ tsconfig.typecheck.json（L2 类型测试工程）
-├─ uno.config.ts
-└─ vitest.config.ts
+└─ uno.config.ts
 ```
 
 ## TypeScript 说明
@@ -215,9 +237,6 @@
 pnpm dev          # 启动开发服务器（默认 :3200）
 pnpm typecheck    # 双工程类型检查（src + 构建工具链，strict 全开，0 错误为绿）
 pnpm lint:fix     # eslint --fix（@antfu 配置 + 分层依赖方向机器化）
-pnpm test         # vitest 单测（L1 纯逻辑）
-pnpm test:cov     # 单测 + 覆盖率（src/utils 与 src/composables 门槛 80%）
-pnpm test:type    # L2 类型契约测试（vitest --typecheck）
 pnpm build        # 产物构建
 ```
 
@@ -225,11 +244,12 @@ pnpm build        # 产物构建
 
 `utils ← api ← composables ← components ← views`，下层禁止反向引用上层；store 不引 UI；api 层不引 UI；views 之间禁止横向 import。规则固化在 `eslint.config.ts`，违规 import 在 lint 阶段直接报错。
 
-### 验收与测试
+### 质量验收口径
 
-- 验收协议：`.agents/skills/ts-acceptance-criteria`（四大支柱 + 整改规范）
-- 验收报告：`docs/ts-acceptance-report-20261004.md`（首轮基线）与 `docs/ts-acceptance-report-20261004-r2.md`（整改后复验）
-- 测试分层：L1 单测（`tests/` 镜像 `src/`）、L2 类型契约（`*.test-d.ts`）、T8 应用冒烟（dev/preview HTTP 200）、L4 功能测试（浏览器 GUI 驱动 §E 清单）
+- 基线门禁：`pnpm typecheck`、`pnpm lint:fix`、`pnpm build` 三绿
+- 功能验证：浏览器实走演示链路（登录 → 商品 → 报价 → 发送锁单 → 打印 PI，双账号数据隔离）
+- 历史验收报告存档于 `docs/`（TS 迁移期产物）
+- 纯逻辑（金额换算/规格矩阵/状态机）设计为无副作用纯函数，可随时以任意测试框架补测
 
 ### 已登记的类型豁免（第三方类型局限）
 

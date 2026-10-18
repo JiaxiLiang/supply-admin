@@ -67,10 +67,6 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    optimizeDeps: {
-      // 强制预构建，避免该依赖首次被按需发现时触发依赖重新优化导致页面整体刷新
-      include: ['vue3-intro-step'],
-    },
     build: {
       // 单 chunk 体积警告阈值（kb），适当放宽减少无效告警
       chunkSizeWarningLimit: 1024,

@@ -3,10 +3,7 @@
 // 先经 generateRoute 生成路由记录收进 accessRoutes（真正 addRoute 由守卫完成），
 // 再包装成菜单节点挂成 menus 树（供侧边栏渲染）
 import type { AccessRoute, MenuItem, PermissionItem } from '@/types/models'
-import { hyphenate } from '@vueuse/core'
 import { defineStore } from 'pinia'
-import { toLayoutMode } from '@/settings'
-import { isExternal } from '@/utils'
 
 export const usePermissionStore = defineStore('permission', {
   state: () => ({
@@ -36,14 +33,13 @@ export const usePermissionStore = defineStore('permission', {
      */
     getMenuItem(item: PermissionItem, parent?: MenuItem): MenuItem | null {
       const route = this.generateRoute(item, item.show ? null : (parent?.key ?? null))
-      // 未启用或仍是外链原始地址的路径不进路由表（外链已由 generateRoute 改写为 iframe 路径）
-      if (item.enable && route.path && !route.path.startsWith('http'))
+      // 未启用的菜单或无路径的目录（path 为空）不进路由表
+      if (item.enable && route.path)
         this.accessRoutes.push(route)
       const menuItem: MenuItem = {
         label: route.meta.title,
         key: route.name,
         path: route.path,
-        originPath: route.meta.originPath,
         // 图标用渲染函数交给 naive 菜单，挂载时才创建虚拟节点
         icon: () => h('i', { class: `${route.meta.icon} text-16` }),
         order: item.order ?? 0,
@@ -65,19 +61,11 @@ export const usePermissionStore = defineStore('permission', {
       return menuItem
     },
     /**
-     * 权限项 → 路由记录。外链改写为 /iframe/:code 内嵌路径，原始地址存入 meta.originPath；
-     * 按钮型子项收进 meta.btns，供按钮级权限使用
+     * 权限项 → 路由记录。按钮型子项收进 meta.btns，供按钮级权限使用
      * @param item 当前权限项
      * @param parentKey 隐藏型菜单所属父路由的 key
      */
     generateRoute(item: PermissionItem, parentKey: string | null): AccessRoute {
-      let originPath
-      if (item.path && isExternal(item.path)) {
-        originPath = item.path
-        // 外链统一走 iframe 容器组件内嵌打开；路径用连字符化的 code 保证合法
-        item.component = '/src/views/iframe/index.vue'
-        item.path = `/iframe/${hyphenate(item.code)}`
-      }
       return {
         name: item.code,
         path: item.path,
@@ -85,11 +73,10 @@ export const usePermissionStore = defineStore('permission', {
         // 此处 component 仍是字符串路径，由权限守卫经 import.meta.glob 换成懒加载组件
         component: item.component,
         meta: {
-          originPath,
           icon: `${item.icon}?mask`,
           title: item.name,
-          // 后端 layout 字符串在边界归一为 LayoutMode，非法值回退默认布局
-          layout: toLayoutMode(item.layout),
+          // 目前仅 'empty' 一种显式布局（整屏页），其余页面统一走通用布局
+          layout: item.layout === 'empty' ? 'empty' : undefined,
           keepAlive: !!item.keepAlive,
           parentKey,
           btns: item.children

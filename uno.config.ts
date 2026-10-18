@@ -36,14 +36,14 @@ export default defineConfig({
     ['flex-col', 'flex flex-col'],
     ['card-border', 'border border-solid border-light_border dark:border-dark_border'],
     ['auto-bg', 'bg-white dark:bg-dark'],
-    ['auto-bg-hover', 'hover:bg-#eaf0f1 hover:dark:bg-#1b2429'],
-    ['auto-bg-highlight', 'bg-#eaf0f1 dark:bg-#1b2429'],
+    ['auto-bg-hover', 'hover:bg-#edf2f0 hover:dark:bg-#1e2a26'],
+    ['auto-bg-highlight', 'bg-#edf2f0 dark:bg-#1e2a26'],
     ['text-highlight', 'rounded-4 px-8 py-2 auto-bg-highlight'],
     ['f-card', 'auto-bg rounded-8 card-shadow'],
     ['f-card-hover', 'transition-shadow-300 hover:shadow-[0_6px_16px_-4px_#0000001f,0_12px_28px_2px_#00000017]'],
-    ['glass-bar', 'bg-white/70 dark:bg-#18181c/72 backdrop-blur-16px'],
-    ['sider-dark', 'bg-#18181c dark:bg-#101014 text-white'],
-    ['brand-gradient', 'bg-gradient-to-r from-#2F54EB to-#13C2C2'],
+    ['glass-bar', 'bg-white/70 dark:bg-#1a2622/72 backdrop-blur-16px'],
+    ['sider-dark', 'bg-#2e423e dark:bg-#1a2622 text-white'],
+    ['brand-gradient', 'bg-gradient-to-r from-#23C891 to-#91E3C8'],
     ['brand-gradient-text', 'brand-gradient bg-clip-text text-transparent'],
   ],
   rules: [
@@ -55,11 +55,11 @@ export default defineConfig({
   ],
   theme: {
     colors: {
-      // primary 走 CSS 变量以支持运行时换肤
+      // primary 走 CSS 变量以支持运行时换肤；dark 系为墨绿调中性色（与主色 #23C891 同族）
       primary: 'rgba(var(--primary-color))',
-      dark: '#18181c',
-      light_border: '#efeff5',
-      dark_border: '#2d2d30',
+      dark: '#151d1a',
+      light_border: '#eef1ef',
+      dark_border: '#2a3631',
     },
   },
 })

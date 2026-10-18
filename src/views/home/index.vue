@@ -1,6 +1,6 @@
 <template>
   <AppPage show-footer>
-    <div class="flex flex-col rounded-8 from-#2F54EB to-#13C2C2 bg-gradient-to-r px-32 py-24 text-white card-shadow md:flex-row md:items-center">
+    <div class="flex flex-col rounded-8 brand-gradient px-32 py-24 text-white card-shadow md:flex-row md:items-center">
       <div class="flex items-center">
         <n-avatar round :size="60" :src="userStore.avatar" class="flex-shrink-0" />
         <div class="ml-20 flex-col">
@@ -22,7 +22,7 @@
           开发文档
         </n-button>
         <n-button
-          class="!bg-white !text-#2F54EB hover:!opacity-90"
+          class="!bg-white !text-#23C891 hover:!opacity-90"
           tag="a"
           href="https://github.com/zclzone/vue-naive-admin/tree/2.x"
           target="__blank"
@@ -45,13 +45,13 @@
         </template>
 
         <p class="opacity-60">
-          这是一款极简风格的后台管理模板，包含前后端解决方案，前端使用 Vite + Vue3 + Pinia +
-          Unocss，后端使用 Nestjs + TypeOrm +
-          MySql，简单易用，赏心悦目，历经十几次重构和细节打磨，诚意满满！！
+          这是跨境供应链管理系统的前端：基于权限动态路由，覆盖商品、报价单、PI 打印的采购报价业务流；
+          使用 Vite + Vue3 + TypeScript + Pinia + Unocss 构建，配套 Nestjs + TypeOrm + MySql 后端；
+          开发期以内置 mock 脱后端运行，对接真实后端只需切换环境开关。
         </p>
         <ul class="mt-12 opacity-90">
           <li class="py-4">
-            🆒 使用 <b>Vue3</b> 主流技术栈: <span class="text-highlight">Vite + Vue3 + Pinia</span>
+            🆒 使用 <b>Vue3</b> 主流技术栈: <span class="text-highlight">Vite + Vue3 + TypeScript + Pinia</span>
           </li>
           <li class="py-4">
             🍇 使用 <b>原子CSS</b> 框架: <span class="text-highlight">Unocss</span>，优雅、轻量、易用
@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-// 首页：欢迎横幅 + 项目特性介绍 + 两块 ECharts 图表（技术栈占比饼图、star/fork 趋势折柱混合图）
+// 首页：欢迎横幅 + 项目特性介绍 + 两块 ECharts 图表（技术栈语言占比饼图、报价业务月度趋势图）
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
@@ -130,7 +130,7 @@ echarts.use([
   PieChart,
 ])
 
-// 趋势图配置：star 走左轴折线，fork 走右轴柱状，双 y 轴量级不同
+// 趋势图配置：业务演示数据——报价单数走左轴柱状，报价金额（万美元）走右轴折线
 const trendOption = {
   tooltip: {
     trigger: 'axis',
@@ -143,7 +143,7 @@ const trendOption = {
   },
   legend: {
     top: '5%',
-    data: ['star', 'fork'],
+    data: ['报价单数', '报价金额(万美元)'],
   },
   xAxis: [
     {
@@ -158,8 +158,8 @@ const trendOption = {
     {
       type: 'value',
       min: 0,
-      max: 3000,
-      interval: 500,
+      max: 40,
+      interval: 10,
       axisLabel: {
         formatter: '{value}',
       },
@@ -167,8 +167,8 @@ const trendOption = {
     {
       type: 'value',
       min: 0,
-      max: 500,
-      interval: 100,
+      max: 140,
+      interval: 35,
       axisLabel: {
         formatter: '{value}',
       },
@@ -176,20 +176,20 @@ const trendOption = {
   ],
   series: [
     {
-      name: 'star',
-      type: 'line',
-      data: [200, 320, 520, 550, 600, 805, 888, 950, 1300, 2503, 2702, 2712],
+      name: '报价单数',
+      type: 'bar',
+      data: [6, 8, 5, 9, 12, 10, 14, 11, 16, 13, 18, 15],
     },
     {
-      name: 'fork',
+      name: '报价金额(万美元)',
       yAxisIndex: 1,
-      type: 'bar',
-      data: [40, 72, 110, 115, 121, 175, 180, 201, 260, 398, 423, 455],
+      type: 'line',
+      data: [28, 35, 26, 41, 52, 47, 58, 49, 66, 55, 72, 63],
     },
   ],
 }
 
-// 技术栈占比环形图配置：默认隐藏标签，悬停时在中心放大显示
+// 技术栈占比环形图配置：按 src 下 ts/vue/css 真实行数占比统计；默认隐藏标签，悬停时在中心放大显示
 const skillOption = {
   tooltip: {
     trigger: 'item',
@@ -226,11 +226,9 @@ const skillOption = {
         show: false,
       },
       data: [
-        { value: 38.5, name: 'Vue' },
-        { value: 37.0, name: 'JavaScript' },
-        { value: 6.5, name: 'CSS' },
-        { value: 6.2, name: 'HTML' },
-        { value: 1.8, name: 'Other' },
+        { value: 54.3, name: 'Vue SFC' },
+        { value: 40.5, name: 'TypeScript' },
+        { value: 5.2, name: 'CSS' },
       ],
     },
   ],

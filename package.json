@@ -52,8 +52,7 @@
     "vite": "^8.0.14",
     "vite-plugin-router-warn": "^2.0.0",
     "vite-plugin-vue-devtools": "^8.1.2",
-    "vue-tsc": "^3.3.11",
-    "vue3-intro-step": "^1.0.5"
+    "vue-tsc": "^3.3.11"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"

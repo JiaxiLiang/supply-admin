@@ -1,5 +1,6 @@
 import type { AxiosInstance, AxiosRequestConfig } from 'axios'
 import axios from 'axios'
+import { getMockAdapterConfig } from '@/mock'
 import { setupInterceptors } from './interceptors'
 
 /** 后端统一响应体（拦截器 resResolve 成功时 resolve 的就是它） */
@@ -81,6 +82,7 @@ export function createAxios(options: AxiosRequestConfig = {}): AxiosInstance {
 /**
  * 全局请求实例。响应拦截器把 axios 的 AxiosResponse 改写为后端响应体，而 axios 方法级
  * 泛型（默认 AxiosResponse<T>）无法表达这个运行时事实，故断言为自封装的 HttpClient——
- * 这是 axios 类型体系与拦截器改写行为之间的唯一边界
+ * 这是 axios 类型体系与拦截器改写行为之间的唯一边界。
+ * VITE_USE_MOCK=true 时注入 mock 适配器：拦截器照常工作，仅"网络"被替换为内存路由表
  */
-export const request: HttpClient = createAxios() as unknown as HttpClient
+export const request: HttpClient = createAxios(getMockAdapterConfig()) as unknown as HttpClient

@@ -125,11 +125,6 @@ export function isUrl(path: string): boolean {
   return reg.test(path)
 }
 
-/** 是否为外部链接（http/https/mailto/tel 开头）；入参放宽可空，缺省与空串同样返回 false */
-export function isExternal(path: string | null | undefined): boolean {
-  return /^https?:|mailto:|tel:/.test(path ?? '')
-}
-
 /** 服务端渲染环境判断（本项目为纯前端 SPA，恒为 false；保留供未来 SSR/同构复用） */
 export const isServer: boolean = typeof window === 'undefined'
 
