@@ -3,3 +3,7 @@ node_modules
 dist
 stats.html
 .task-artifacts
+.agents/
+.qoder/
+.idea/
+.VSCodeCounter/

@@ -1,5 +1,5 @@
 // 报价单模块的页面级模型：状态机、金额联动计算、下拉选项。
-// 纯函数不依赖 vue，可被 node 测试环境直接验证（tests/views/sale/quotation/model.spec.ts）
+// 纯函数不依赖 vue，可在任意 node 测试环境中直接验证
 import type { DataTableColumn } from 'naive-ui'
 import type { QuotationCurrency, QuotationItem, QuotationRow, QuotationStatus, TradeTerm } from '@/types/models'
 import { calcGrossMargin, mulFen } from '@/utils/money'

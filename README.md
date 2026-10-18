@@ -18,7 +18,7 @@
 | `admin` | `123456` | 超级管理员（可切换业务员身份） | 全部报价单         |
 | `sale`  | `123456` | 业务员                         | 仅本人创建的报价单 |
 
-**mock 层**：`VITE_USE_MOCK='true'`（默认开）时请求由内存 mock 适配器应答（`src/mock/`，覆盖登录/权限树/两个业务模块/系统管理接口），拦截器链路不变；改为 `'false'` 即恢复真实后端（NestJS）。业务扩展方式：**新增页面零路由代码**——路由与菜单由权限数据驱动（`src/mock/permissions.ts`，路由 name 即权限 code），页面级状态不进 Pinia（与既有 CRUD 页一致，页面自持 + useRequest）。
+**mock 层**：`VITE_USE_MOCK='true'`（默认开）时请求由内存 mock 适配器应答（`src/mock/`，覆盖登录/权限树/两个业务模块/系统管理接口），拦截器链路不变；改为 `'false'` 即恢复真实后端（NestJS）。业务扩展方式：**新增页面零路由代码**——路由与菜单由权限数据驱动（`src/mock/index.ts` 内按角色下发的权限树，路由 name 即权限 code），页面级状态不进 Pinia（与既有 CRUD 页一致，页面自持 + useRequest）。
 
 ```
 跨境供应链管理系统
@@ -40,7 +40,7 @@
 ├─ pnpm-lock.yaml
 ├─ pnpm-workspace.yaml
 ├─ public
-│  └─ favicon.png
+│  └─ favicon.svg
 ├─ src
 │  ├─ api
 │  │  └─ index.ts（含 createCrudApi<T, Q> CRUD 接口工厂）
@@ -57,7 +57,6 @@
 │  │  │  ├─ AppPage.vue
 │  │  │  ├─ CommonPage.vue
 │  │  │  ├─ index.ts
-│  │  │  ├─ LayoutSetting.vue
 │  │  │  ├─ TheFooter.vue
 │  │  │  ├─ TheLogo.vue
 │  │  │  ├─ ThemeSetting.vue
@@ -102,17 +101,8 @@
 │  │  │  └─ sidebar
 │  │  │     └─ index.vue
 │  ├─ main.ts
-│  ├─ mock（mock 层：axios 适配器 + 内存路由表 + 双账号权限树，VITE_USE_MOCK 开关）
-│  │  ├─ base.ts（路由契约 / MockError / token 编解码）
-│  │  ├─ db.ts（种子数据：商品 / 报价单 / 演示账号）
-│  │  ├─ index.ts（适配器总装：路由匹配 → ApiResult 应答）
-│  │  ├─ permissions.ts（按角色下发的权限树，新增页面只改这里）
-│  │  └─ routes
-│  │     ├─ auth.ts
-│  │     ├─ catalog.ts（商品 + 选品接口）
-│  │     ├─ index.ts
-│  │     ├─ quotation.ts（状态机守卫 + 金额聚合）
-│  │     └─ system.ts（用户 / 角色 / 权限资源）
+│  ├─ mock（mock 层单文件总装：axios 适配器 + 内存路由表 + 按角色权限树，VITE_USE_MOCK 开关）
+│  │  └─ index.ts（路径匹配 → MockCtx 应答：认证 / 权限树 / 商品选品 / 报价单状态机守卫 / 系统管理）
 │  ├─ router
 │  │  ├─ basic-routes.ts（satisfies RouteRecordRaw[]）
 │  │  ├─ guards
@@ -193,9 +183,6 @@
 │     │  └─ user
 │     │     ├─ api.ts
 │     │     └─ index.vue
-│     ├─ profile
-│     │  ├─ api.ts
-│     │  └─ index.vue
 │     └─ sale
 │        └─ quotation
 │           ├─ api.ts
@@ -248,7 +235,7 @@ pnpm build        # 产物构建
 
 - 基线门禁：`pnpm typecheck`、`pnpm lint:fix`、`pnpm build` 三绿
 - 功能验证：浏览器实走演示链路（登录 → 商品 → 报价 → 发送锁单 → 打印 PI，双账号数据隔离）
-- 历史验收报告存档于 `docs/`（TS 迁移期产物）
+- 验收报告与过程记录为本地工作存档，不入库（`docs/` 仅保留架构文档）
 - 纯逻辑（金额换算/规格矩阵/状态机）设计为无副作用纯函数，可随时以任意测试框架补测
 
 ### 已登记的类型豁免（第三方类型局限）

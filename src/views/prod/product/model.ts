@@ -1,5 +1,5 @@
 // 商品模块的页面级模型：表格行/列扩展类型与规格矩阵生成。
-// 纯函数不依赖 vue，可被 node 测试环境直接验证（tests/views/prod/product/model.spec.ts）
+// 纯函数不依赖 vue，可在任意 node 测试环境中直接验证
 import type { DataTableColumn } from 'naive-ui'
 import type { ProductRow, Sku } from '@/types/models'
 
