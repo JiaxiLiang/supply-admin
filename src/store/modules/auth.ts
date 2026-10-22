@@ -33,14 +33,13 @@ export const useAuthStore = defineStore('auth', {
     },
     /** 退出/换号的统一清理入口：按 路由 → 用户 → 权限 → 页签 → token 的顺序复位 */
     resetLoginState() {
-      const { resetUser } = useUserStore()
-      const { resetRouter } = useRouterStore()
-      const { resetPermission, accessRoutes } = usePermissionStore()
-      const { resetTabs } = useTabStore()
-      resetRouter(accessRoutes)
-      resetUser()
-      resetPermission()
-      resetTabs()
+      // state/getters 不得从仓库解构（断开响应性），一律经实例访问；action 解构安全（Pinia 已绑定 this）
+      const userStore = useUserStore()
+      const permissionStore = usePermissionStore()
+      useRouterStore().resetRouter(permissionStore.accessRoutes)
+      userStore.resetUser()
+      permissionStore.resetPermission()
+      useTabStore().resetTabs()
       this.resetToken()
     },
     /** 登出：清理全部登录态并回到登录页 */

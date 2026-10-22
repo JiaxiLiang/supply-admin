@@ -8,8 +8,8 @@
       :scroll-x="820"
       :columns="columns"
       :get-data="api.getSkuOptions"
-      @on-checked="onChecked"
-      @on-data-change="onDataChange"
+      @checked-change="handleChecked"
+      @data-change="handleDataChange"
     >
       <MeQueryItem label="关键词" :label-width="50">
         <n-input v-model:value="queryItems.keyword" type="text" placeholder="款号 / 标题" clearable />
@@ -41,6 +41,7 @@
 // MeCrud 关闭远端分页（:remote="false"），候选 SKU 全量拉取后本地翻页；
 // n-modal 内容默认按需挂载，每次 open 都会重新走 MeCrud 首查
 import type { DataTableColumns } from 'naive-ui'
+import type { MeCrudExposed } from '@/types/me-components'
 import type { ProductCategory, SkuOption } from '@/types/models'
 import { NTag } from 'naive-ui'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
@@ -59,14 +60,14 @@ const emit = defineEmits<{
 }>()
 
 const [modalRef] = useModal()
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
 
 const queryItems = ref<SkuPickerQuery>({})
 
 /** 勾选集合：以 skuId 为主键，翻页勾选不丢（本地分页下即全量勾选状态） */
 const checkedSkuIds = ref<Set<number>>(new Set())
 
-/** 全量候选快照（MeCrud 每次查询后经 on-data-change 回传），确认时据此还原勾选行 */
+/** 全量候选快照（MeCrud 每次查询后经 data-change 回传），确认时据此还原勾选行 */
 const allOptions = ref<SkuOption[]>([])
 
 const columns: DataTableColumns<SkuOption> = [
@@ -89,11 +90,11 @@ const columns: DataTableColumns<SkuOption> = [
   },
 ]
 
-function onChecked(rowKeys: Array<string | number>) {
+function handleChecked(rowKeys: Array<string | number>) {
   checkedSkuIds.value = new Set(rowKeys as number[])
 }
 
-function onDataChange(data: SkuOption[]) {
+function handleDataChange(data: SkuOption[]) {
   allOptions.value = data
 }
 

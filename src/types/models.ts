@@ -84,6 +84,12 @@ export interface PageParams { pageNo?: number, pageSize?: number }
 /** 状态字段的查询侧契约：列表过滤用 0/1 数字，与行数据的 boolean 开关区分 */
 export interface EnabledQuery { enable?: 0 | 1 }
 
+/** 通用启停筛选项（EnabledQuery 的选项词汇表）：用户/角色等列表的状态筛选共用 */
+export const ENABLE_OPTIONS = [
+  { label: '启用', value: 1 },
+  { label: '停用', value: 0 },
+] satisfies { label: string, value: 0 | 1 }[]
+
 /**
  * 用户列表查询参数：实体过滤字段 + 分页组合；enable 从实体 Omit 后改用数字契约覆盖，
  * 索引签名声明查询参数本质是字符串键的宽松键袋（满足 MeCrud 泛型 Q 的约束）

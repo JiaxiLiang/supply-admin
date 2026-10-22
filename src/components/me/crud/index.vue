@@ -1,37 +1,9 @@
 <template>
   <div class="h-full flex flex-col overflow-hidden">
-    <AppCard v-if="$slots.default" bordered bg="#fafafc dark:black" class="mb-30 min-h-60">
-      <!-- 包一层 form：搜索输入框内按回车即可触发搜索 -->
-      <form class="flex justify-between p-16" @submit.prevent="handleSearch()">
-        <n-scrollbar x-scrollable>
-          <!-- 可展开的搜索栏在收起态强制单行（超出部分横向滚动），展开后允许换行铺开 -->
-          <n-space :wrap="!expand || isExpanded" :size="[32, 16]" class="p-10">
-            <slot />
-          </n-space>
-        </n-scrollbar>
-        <div class="flex-shrink-0 p-10">
-          <n-button ghost type="primary" @click="handleReset">
-            <i class="i-fe:rotate-ccw mr-4" />
-            重置
-          </n-button>
-          <n-button attr-type="submit" class="ml-20" type="primary">
-            <i class="i-fe:search mr-4" />
-            搜索
-          </n-button>
-
-          <template v-if="expand">
-            <n-button v-if="!isExpanded" type="primary" text @click="toggleExpand">
-              <i class="i-fe:chevrons-down ml-4" />
-              展开
-            </n-button>
-            <n-button v-else text type="primary" @click="toggleExpand">
-              <i class="i-fe:chevrons-up ml-4" />
-              收起
-            </n-button>
-          </template>
-        </div>
-      </form>
-    </AppCard>
+    <!-- 搜索栏独立成 SearchBar 组件：展开收起等交互状态归它自持，这里只转发查询项插槽与 search/reset 事件 -->
+    <SearchBar v-if="$slots.default" :expand="expand" @search="handleSearch()" @reset="handleReset">
+      <slot />
+    </SearchBar>
 
     <NDataTable
       :remote="remote"
@@ -43,7 +15,7 @@
       :pagination="isPagination ? pagination : false"
       flex-height
       class="flex-1"
-      @update:checked-row-keys="onChecked"
+      @update:checked-row-keys="handleChecked"
       @update:page="onPageChange"
     />
   </div>
@@ -56,11 +28,13 @@ import type { PageResult } from '@/types/models'
 import type { ApiResult } from '@/utils/http'
 import { NDataTable } from 'naive-ui'
 import { utils, writeFile } from 'xlsx'
+import SearchBar from './SearchBar.vue'
 
-// 通用 CRUD 表格：搜索栏（默认插槽）+ 数据表格 + 分页 + Excel 导出，四合一的「半成品」组件
-// 分工：本组件只管渲染与交互，查询条件由页面持有并经 v-model:queryItems 双向绑定
+// 通用 CRUD 表格：搜索栏（SearchBar 子组件 + 默认插槽）+ 数据表格 + 分页 + Excel 导出
+// 分工：本组件管表格数据（拉取/分页/空页回退）与导出，搜索栏交互归 SearchBar；
+// 查询条件由页面持有并经 v-model:queryItems 双向绑定
 // 与 useCrud 配合：useCrud（useModal+useForm 封装）负责新增/编辑/删除等弹窗动作，
-// 其 refresh 回调经本组件 ref 调 handleSearch 刷新表格；勾选行 key 经 onChecked 交给页面做批量删除
+// 其 refresh 回调经本组件 ref 调 handleSearch 刷新表格；勾选行 key 经 checkedChange 交给页面做批量删除
 // 泛型 T 为行数据类型；Q 为查询条件类型，由 :get-data 参数反向推断，字段拼错编译期报错
 
 interface Props {
@@ -93,11 +67,11 @@ const props = withDefaults(defineProps<Props>(), {
   expand: false,
 })
 
-// onChecked：勾选行 key 数组变化；onDataChange：每次查询后把最新表格数据回传页面
+// checkedChange：勾选行 key 数组变化；dataChange：每次查询后把最新表格数据回传页面
 const emit = defineEmits<{
   'update:queryItems': [value: Q]
-  'onChecked': [rowKeys: Array<string | number>]
-  'onDataChange': [data: T[]]
+  'checkedChange': [rowKeys: Array<string | number>]
+  'dataChange': [data: T[]]
 }>()
 const loading = ref(false)
 const initQuery = { ...props.queryItems } as Q // 查询条件快照，重置时按它恢复
@@ -111,16 +85,9 @@ const pagination = reactive<PaginationProps>({
   },
 })
 
-const isExpanded = ref(false)
-
 /** 行键取值：按调用方指定的 rowKey 字段（默认 id）读取，约定为 string | number */
 function getRowKey(row: T): string | number {
   return (row as Record<string, unknown>)[props.rowKey ?? 'id'] as string | number
-}
-
-/** 展开/收起搜索栏 */
-function toggleExpand() {
-  isExpanded.value = !isExpanded.value
 }
 
 /** 拉取表格数据：组装查询条件与分页参数请求接口，并维护 loading、总条数与空页回退 */
@@ -150,7 +117,7 @@ async function handleQuery() {
     pagination.itemCount = 0
   }
   finally {
-    emit('onDataChange', tableData.value)
+    emit('dataChange', tableData.value)
     loading.value = false
   }
 }
@@ -191,11 +158,11 @@ function onPageChange(currentPage: number) {
 }
 
 /** 勾选变化：仅当列配置里真的有多选列时才向外派发，无勾选列的页面不会误触发 */
-function onChecked(rowKeys: Array<string | number>) {
+function handleChecked(rowKeys: Array<string | number>) {
   // DataTableColumn 联合中只有 selection 列带 type 字段，用 in 收窄判定
   const hasSelection = props.columns.some(item => 'type' in item && item.type === 'selection')
   if (hasSelection) {
-    emit('onChecked', rowKeys)
+    emit('checkedChange', rowKeys)
   }
 }
 

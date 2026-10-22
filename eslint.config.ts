@@ -39,6 +39,7 @@ export default antfu({
       defineAsyncComponent: 'readonly',
       nextTick: 'readonly',
       onScopeDispose: 'readonly',
+      useTemplateRef: 'readonly',
       useRoute: 'readonly',
       useRouter: 'readonly',
       Message: 'readonly',

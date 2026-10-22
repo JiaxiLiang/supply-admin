@@ -32,3 +32,13 @@ export interface MeModalExposed {
   okLoading: boolean
   options: ModalOptions
 }
+
+/** MeCrud 组件 defineExpose 的形状：页面侧 $table 模板 ref 统一引用此类型，契约单一来源 */
+export interface MeCrudExposed {
+  /** 发起搜索（keepCurrentPage true 按当前页码重查；常规搜索一律回第 1 页） */
+  handleSearch: (keepCurrentPage?: boolean) => void
+  /** 重置查询条件并回第 1 页 */
+  handleReset: () => void
+  /** 导出当前表格为 Excel */
+  handleExport: () => void
+}

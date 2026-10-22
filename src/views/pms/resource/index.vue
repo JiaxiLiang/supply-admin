@@ -69,7 +69,7 @@
             ref="$table"
             :columns="btnsColumns"
             :scroll-x="-1"
-            :get-data="api.getButtons"
+            :get-data="getButtons"
             :query-items="{ parentId: currentMenu.id }"
           />
         </template>
@@ -84,19 +84,27 @@
 // 资源（菜单/按钮权限）管理页：左侧 MenuTree 选择菜单，右侧展示菜单详情及其下的按钮权限点列表；
 // 支持菜单与按钮的新增、编辑、删除，以及按钮的启用/停用切换
 import type { DataTableColumns } from 'naive-ui'
+import type { ButtonQuery } from './api'
+import type { MeCrudExposed } from '@/types/me-components'
 import type { PermissionItem } from '@/types/models'
-import { NButton, NSwitch } from 'naive-ui'
+import type { ApiResult } from '@/utils/http'
+import { NButton } from 'naive-ui'
 import { MeCrud } from '@/components'
+import { renderEnableSwitch, useDelete, useEnableRow } from '@/composables'
 import api from './api'
 import MenuTree from './components/MenuTree.vue'
 import ResAddOrEdit from './components/ResAddOrEdit.vue'
 
-// 按钮行数据：PermissionItem + 状态开关的行级 loading 态（前端 UI 字段，不来自后端）
-type BtnRow = PermissionItem & { enableLoading?: boolean }
+// 按钮行数据：PermissionItem + 状态开关的行级 loading 态（前端 UI 字段，不来自后端）；
+// 列表行来自后端必带 id，交叉类型收窄掉契约里的可选性——启停/删除标准件（useEnableRow/useDelete）都要求 id 必有
+type BtnRow = PermissionItem & { enableLoading?: boolean, id: number }
 
 const treeData = ref<PermissionItem[]>([])
 const treeLoading = ref(false)
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
+// 按钮行来自后端必带 id，契约类型（PermissionItem）上却是可选：该运行时事实编译器不可知，
+// 在数据入口收口一次，让行数据满足 BtnRow（启停/删除标准件均要求 id 必有）
+const getButtons = api.getButtons as (params: ButtonQuery) => Promise<ApiResult<BtnRow[]>>
 const currentMenu = ref<PermissionItem | null>(null)
 // 刷新入口：树节点变更时只重查菜单树并回显选中项；按钮节点变更时仅刷新按钮表格
 async function initData(data?: PermissionItem) {
@@ -113,6 +121,19 @@ async function initData(data?: PermissionItem) {
     currentMenu.value = data
 }
 initData()
+
+// 删除按钮权限点走确认删除标准件：确认框 → 调接口 → 提示并刷新按钮表格
+const { handleDelete: handleDeleteBtn } = useDelete(
+  id => api.deletePermission(id),
+  () => $table.value!.handleSearch(),
+)
+
+// 启停切换走 useEnableRow 标准件（savePermission 是路径传参形态，适配一层即可复用）；
+// 行级 loading 防重复点击，失败不翻转状态，错误提示由 http 层统一弹出
+const { handleEnable } = useEnableRow(
+  ({ id, enable }) => api.savePermission(id, { enable }),
+  () => $table.value!.handleSearch(),
+)
 
 const modalRef = ref<InstanceType<typeof ResAddOrEdit> | null>(null)
 // 打开编辑菜单弹窗，回填当前菜单数据
@@ -132,21 +153,7 @@ const btnsColumns: DataTableColumns<BtnRow> = [
   {
     title: '状态',
     key: 'enable',
-    render: (row: BtnRow) =>
-      h(
-        NSwitch,
-        {
-          size: 'small',
-          rubberBand: false,
-          value: row.enable,
-          loading: !!row.enableLoading,
-          onUpdateValue: () => handleEnable(row),
-        },
-        {
-          checked: () => '启用',
-          unchecked: () => '停用',
-        },
-      ),
+    render: (row: BtnRow) => renderEnableSwitch(row, handleEnable),
   },
   {
     title: '操作',
@@ -176,7 +183,7 @@ const btnsColumns: DataTableColumns<BtnRow> = [
             size: 'small',
             type: 'error',
             style: 'margin-left: 12px;',
-            onClick: () => handleDeleteBtn(row.id!),
+            onClick: () => handleDeleteBtn(row.id),
           },
           {
             default: () => '删除',
@@ -216,45 +223,5 @@ function handleEditBtn(row: BtnRow) {
     row,
     okText: '保存',
   })
-}
-
-// 删除按钮权限点：确认后调接口并刷新按钮表格
-function handleDeleteBtn(id: number | string) {
-  const d = $dialog.warning({
-    content: '确定删除？',
-    title: '提示',
-    positiveText: '确定',
-    negativeText: '取消',
-    async onPositiveClick() {
-      try {
-        d.loading = true
-        await api.deletePermission(id)
-        $message.success('删除成功')
-        $table.value!.handleSearch()
-        d.loading = false
-      }
-      catch (error) {
-        console.error(error)
-        d.loading = false
-      }
-    },
-  })
-}
-
-// 切换按钮启用/停用：行级 loading 防止重复点击，失败不翻转状态
-async function handleEnable(item: BtnRow) {
-  try {
-    item.enableLoading = true
-    await api.savePermission(item.id!, {
-      enable: !item.enable,
-    })
-    $message.success('操作成功')
-    $table.value?.handleSearch()
-    item.enableLoading = false
-  }
-  catch (error) {
-    console.error(error)
-    item.enableLoading = false
-  }
 }
 </script>

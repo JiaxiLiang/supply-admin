@@ -45,7 +45,8 @@ import { useAuthStore, useUserStore } from '@/store'
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const roles = ref(userStore.roles || [])
+// 可选角色跟随 user store 派生（不做一次性快照拷贝）；当前选中编码是本地编辑态，初值取自 store
+const roles = computed(() => userStore.roles || [])
 const roleCode = ref(userStore.currentRole?.code ?? roles.value[0]?.code ?? '')
 
 const [modalRef, okLoading] = useModal()

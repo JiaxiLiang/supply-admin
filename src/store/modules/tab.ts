@@ -77,8 +77,7 @@ export const useTabStore = defineStore('tab', {
       }
     },
     /** 关闭除指定页签外的全部页签；激活页签被关时跳到剩下的页签 */
-    removeOther(curPath?: string) {
-      curPath = curPath ?? this.activeTab
+    removeOther(curPath: string) {
       this.setTabs(this.tabs.filter(tab => tab.path === curPath))
       if (curPath !== this.activeTab) {
         const last = this.tabs.at(-1)

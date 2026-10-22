@@ -23,7 +23,7 @@
 // 规格矩阵：颜色/尺码两组动态标签做笛卡尔积，实时生成 SKU 行（明细表格随组合自动增删）。
 // 已录入的成本按「颜色|尺码」键在重建时保留；成本以元输入、以分上抛（存储契约见 models.ts）。
 // seed 只在挂载时读取一次：弹窗每次打开由页面侧用 :key 重挂本组件实现重新播种，
-// 组件 emit 引发的 seed 变化不回灌内部状态，避免「标签输入 → 重建 → 重置」的反馈回路
+// 单向数据流（seed 进、change 出）不回灌内部状态，避免「标签输入 → 重建 → 重置」的反馈回路
 import type { DataTableColumns } from 'naive-ui'
 import type { Sku } from '@/types/models'
 import { NDataTable, NInputNumber } from 'naive-ui'
@@ -38,7 +38,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'update:skus': [skus: Sku[]]
+  change: [skus: Sku[]]
 }>()
 
 const seed = props.seed ?? []
@@ -59,13 +59,13 @@ function onSizesChange(value: string[]) {
 /** 重建矩阵：以当前行为 prev（保留存量成本），重建结果即时上抛给弹窗表单 */
 function rebuild() {
   rows.value = buildSkuMatrix(colors.value, sizes.value, rows.value)
-  emit('update:skus', rows.value)
+  emit('change', rows.value)
 }
 
 /** 成本输入（元）→ 分存储，行数据整体替换保持不可变更新 */
 function updateCost(index: number, yuan: number | null) {
   rows.value = rows.value.map((row, i) => (i === index ? { ...row, cost: yuanToFen(yuan ?? 0) } : row))
-  emit('update:skus', rows.value)
+  emit('change', rows.value)
 }
 
 const columns: DataTableColumns<Sku> = [

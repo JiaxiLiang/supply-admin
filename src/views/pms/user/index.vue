@@ -31,10 +31,7 @@
         <n-select
           v-model:value="queryItems.enable"
           clearable
-          :options="[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
-          ]"
+          :options="ENABLE_OPTIONS"
         />
       </MeQueryItem>
     </MeCrud>
@@ -75,9 +72,7 @@
         <n-form-item v-if="['add', 'setRole'].includes(modalAction)" label="角色" path="roleIds">
           <n-select
             v-model:value="modalForm.roleIds"
-            :options="roles"
-            label-field="name"
-            value-field="id"
+            :options="roleOptions"
             clearable
             filterable
             multiple
@@ -105,11 +100,13 @@
 // 用户管理页：MeCrud 表格维护用户，弹窗按 modalAction 复用四种形态——新增（含初始密码/角色/状态）、
 // 分配角色（setRole）、重置密码（reset）；"创建新用户"按钮与超管列经 v-permission 按权限点控制显隐
 import type { UserRow, UserTableColumn } from '@/composables'
+import type { MeCrudExposed } from '@/types/me-components'
 import type { Role, UserInfoQuery } from '@/types/models'
-import { NButton, NSwitch } from 'naive-ui'
+import { NButton } from 'naive-ui'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
-import { GENDERS, getBaseUserColumns, useCrud, useEnableRow, useRequest, useRouteQuery } from '@/composables'
+import { GENDERS, getBaseUserColumns, renderEnableSwitch, useCrud, useEnableRow, useRequest, useRouteQuery } from '@/composables'
 import { withPermission } from '@/directives'
+import { ENABLE_OPTIONS } from '@/types/models'
 import api from './api'
 
 defineOptions({ name: 'UserMgt' })
@@ -117,7 +114,7 @@ defineOptions({ name: 'UserMgt' })
 // 弹窗表单：用户字段 + 新增时的 password、分配角色时的 roleIds
 type UserForm = Partial<UserRow> & { password?: string, roleIds?: number[] }
 
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
 // 筛选条件经 useRouteQuery 同步到 URL，刷新/分享/直开不丢；undefined 全部声明在册，
 // axios 序列化时本就丢弃 undefined 参数，行为与旧版 queryItems = ref({}) 一致
 const queryItems = useRouteQuery<UserInfoQuery>({ username: undefined, gender: undefined, enable: undefined })
@@ -126,15 +123,13 @@ onMounted(() => {
   $table.value?.handleSearch()
 })
 
-// 角色下拉数据走 useRequest 标准件：自带竞态防护与组件卸载自动取消
-// data 是请求标准件的事实源，roles 是视图别名；过期/中止的响应到不了 data，也就不会写入 roles
-const roles = ref<Role[]>([])
+// 角色下拉数据走 useRequest 标准件：自带竞态防护与组件卸载自动取消；
+// 由请求结果直接派生 {label, value} 选项（未返回时以空数组兜底），不再用 watch 手工搬运——
+// 过期/中止的响应到不了 data 也就进不了下拉
 const { data: rolesData, run: fetchRoles } = useRequest<Role[]>(
   signal => api.getAllRoles(signal).then(({ data = [] }) => data),
 )
-watch(rolesData, (value) => {
-  roles.value = value ?? []
-})
+const roleOptions = computed(() => (rolesData.value ?? []).map(role => ({ label: role.name, value: role.id })))
 fetchRoles()
 
 const {
@@ -165,21 +160,7 @@ const columns: UserTableColumn[] = [
     title: '状态',
     key: 'enable',
     width: 120,
-    render: row =>
-      h(
-        NSwitch,
-        {
-          size: 'small',
-          rubberBand: false,
-          value: row.enable,
-          loading: !!row.enableLoading,
-          onUpdateValue: () => handleEnable(row),
-        },
-        {
-          checked: () => '启用',
-          unchecked: () => '停用',
-        },
-      ),
+    render: row => renderEnableSwitch(row, handleEnable),
   },
   {
     title: '操作',

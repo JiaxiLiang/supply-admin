@@ -1,7 +1,7 @@
 import type { ApiResult } from '@/utils/http'
 
 /** 可开关行：id 必有；enable 为开关值；enableLoading 为行级 loading 态（前端 UI 字段，不来自后端） */
-interface EnableRow {
+export interface EnableRow {
   id: number
   enable?: boolean
   enableLoading?: boolean

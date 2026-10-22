@@ -45,6 +45,7 @@
 // 行级数据权限由服务端实现（业务员仅可见本人创建的单据），本页无需感知
 import type { VNode } from 'vue'
 import type { QuotationTableColumn } from './model'
+import type { MeCrudExposed } from '@/types/me-components'
 import type { QuotationQuery, QuotationRow, QuotationStatus } from '@/types/models'
 import { NButton, NTag } from 'naive-ui'
 import { MeCrud, MeQueryItem } from '@/components'
@@ -58,7 +59,7 @@ defineOptions({ name: 'QuotationMgt' })
 
 const router = useRouter()
 
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void, handleExport: () => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
 const queryItems = useRouteQuery<QuotationQuery>({ keyword: undefined, status: undefined, currency: undefined })
 
 onMounted(() => {

@@ -72,143 +72,22 @@
       </n-card>
 
       <n-card class="ml-12 w-50%" title="🛠️ 技术栈" segmented>
-        <VChart :option="skillOption" autoresize />
+        <TechPie />
       </n-card>
     </div>
 
     <n-card class="mt-12" title="⚡️ 趋势" segmented>
-      <div class="h-400">
-        <VChart :option="trendOption" autoresize />
-      </div>
+      <TrendChart />
     </n-card>
   </AppPage>
 </template>
 
 <script setup lang="ts">
-// 首页：欢迎横幅 + 项目特性介绍 + 两块 ECharts 图表（技术栈语言占比饼图、报价业务月度趋势图）
-import { BarChart, LineChart, PieChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
-import * as echarts from 'echarts/core'
-import { UniversalTransition } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
-import VChart from 'vue-echarts'
+// 首页：欢迎横幅 + 项目特性介绍 + 两块 ECharts 图表（图表配置与注册各自内聚在
+// TrendChart / TechPie 子组件，本页只做版面装配）
 import { useUserStore } from '@/store'
+import TechPie from './components/TechPie.vue'
+import TrendChart from './components/TrendChart.vue'
 
 const userStore = useUserStore()
-
-// 按需注册用到的图表类型与组件，减小 echarts 打包体积
-echarts.use([
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  BarChart,
-  LineChart,
-  CanvasRenderer,
-  UniversalTransition,
-  PieChart,
-])
-
-// 趋势图配置：业务演示数据——报价单数走左轴柱状，报价金额（万美元）走右轴折线
-const trendOption = {
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'cross',
-      crossStyle: {
-        color: '#999',
-      },
-    },
-  },
-  legend: {
-    top: '5%',
-    data: ['报价单数', '报价金额(万美元)'],
-  },
-  xAxis: [
-    {
-      type: 'category',
-      data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
-      axisPointer: {
-        type: 'shadow',
-      },
-    },
-  ],
-  yAxis: [
-    {
-      type: 'value',
-      min: 0,
-      max: 40,
-      interval: 10,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-    {
-      type: 'value',
-      min: 0,
-      max: 140,
-      interval: 35,
-      axisLabel: {
-        formatter: '{value}',
-      },
-    },
-  ],
-  series: [
-    {
-      name: '报价单数',
-      type: 'bar',
-      data: [6, 8, 5, 9, 12, 10, 14, 11, 16, 13, 18, 15],
-    },
-    {
-      name: '报价金额(万美元)',
-      yAxisIndex: 1,
-      type: 'line',
-      data: [28, 35, 26, 41, 52, 47, 58, 49, 66, 55, 72, 63],
-    },
-  ],
-}
-
-// 技术栈占比环形图配置：按 src 下 ts/vue/css 真实行数占比统计；默认隐藏标签，悬停时在中心放大显示
-const skillOption = {
-  tooltip: {
-    trigger: 'item',
-    formatter({ name, value }: { name: string, value: number }) {
-      return `${name} ${value}%`
-    },
-  },
-  legend: {
-    left: 'center',
-  },
-  series: [
-    {
-      bottom: '12%',
-      type: 'pie',
-      radius: ['35%', '90%'],
-      avoidLabelOverlap: true,
-      itemStyle: {
-        borderRadius: 10,
-        borderColor: '#fff',
-        borderWidth: 2,
-      },
-      label: {
-        show: false,
-        position: 'center',
-      },
-      emphasis: {
-        label: {
-          show: true,
-          fontSize: 36,
-          fontWeight: 'bold',
-        },
-      },
-      labelLine: {
-        show: false,
-      },
-      data: [
-        { value: 54.3, name: 'Vue SFC' },
-        { value: 40.5, name: 'TypeScript' },
-        { value: 5.2, name: 'CSS' },
-      ],
-    },
-  ],
-}
 </script>

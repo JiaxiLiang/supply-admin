@@ -78,7 +78,7 @@
           :key="specMatrixKey"
           :seed="modalForm.skus"
           :disabled="modalAction === 'view'"
-          @update:skus="skus => (modalForm.skus = skus)"
+          @change="skus => (modalForm.skus = skus)"
         />
       </n-form>
     </MeModal>
@@ -87,13 +87,14 @@
 
 <script setup lang="ts">
 import type { ProductTableColumn } from './model'
+import type { MeCrudExposed } from '@/types/me-components'
 // 商品管理页：MeCrud 维护 SPU 列表，弹窗内以 SpecMatrix 笛卡尔积维护 SKU。
 // 列表行的 SKU 数与成本区间为服务端聚合字段；上架开关走 useEnableRow 行级标准件；
 // 新增/编辑经 v-permission="'AddProduct'" 与权限点联动显隐
 import type { ProductQuery, ProductRow } from '@/types/models'
-import { NButton, NSwitch, NTag } from 'naive-ui'
+import { NButton, NTag } from 'naive-ui'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
-import { useCrud, useEnableRow, useRouteQuery } from '@/composables'
+import { renderEnableSwitch, useCrud, useEnableRow, useRouteQuery } from '@/composables'
 import { CATEGORY_OPTIONS } from '@/types/models'
 import { fenToYuanStr } from '@/utils/money'
 import api from './api'
@@ -101,7 +102,7 @@ import SpecMatrix from './components/SpecMatrix.vue'
 
 defineOptions({ name: 'ProductMgt' })
 
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void, handleExport: () => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
 // 筛选条件经 useRouteQuery 同步到 URL，刷新不丢（项目既有约定，见用户页同款写法）
 const queryItems = useRouteQuery<ProductQuery>({ keyword: undefined, category: undefined, enable: undefined })
 
@@ -185,21 +186,7 @@ const columns: ProductTableColumn[] = [
     key: 'enable',
     width: 100,
     hideInExcel: true,
-    render: row =>
-      h(
-        NSwitch,
-        {
-          size: 'small',
-          rubberBand: false,
-          value: row.enable,
-          loading: !!row.enableLoading,
-          onUpdateValue: () => handleEnable(row),
-        },
-        {
-          checked: () => '上架',
-          unchecked: () => '下架',
-        },
-      ),
+    render: row => renderEnableSwitch(row, handleEnable, { checked: '上架', unchecked: '下架' }),
   },
   { title: '创建时间', key: 'createTime', width: 170 },
   {

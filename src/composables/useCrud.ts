@@ -1,8 +1,7 @@
-import type { DialogOptions } from 'naive-ui'
 import type { ModalOptions } from '@/types/me-components'
 import type { ApiResult } from '@/utils/http'
 import { cloneDeep } from 'lodash-es'
-import { useForm, useModal } from '.'
+import { useDelete, useForm, useModal } from '.'
 
 /** ACTIONS 的键即内置弹窗动作；要新增内置动作，只需在此常量补键值 */
 const ACTIONS: Partial<Record<ModalAction, string>> = {
@@ -54,6 +53,8 @@ export function useCrud<T extends object>(options: UseCrudOptions<T>) {
   const [modalRef, okLoading] = useModal()
   // 显式标注泛型 Partial<T>：解构默认值 {} 会让 TS 把 initForm 推断成空对象类型，modalForm 将丢失字段类型
   const [modalFormRef, modalForm, validation] = useForm<Partial<T>>(initForm ?? {})
+  // 删除走确认删除标准件：成功后按 keepCurrentPage 语义刷新列表（删除后常留在当前页）
+  const { handleDelete } = useDelete(doDelete, data => refresh(data, true))
 
   /** 新增：表单初始值 = initForm 与 row 各自深拷贝后合并（row 优先），支持带默认值打开新增弹窗 */
   function handleAdd(row: Partial<T> = {}, title?: string) {
@@ -129,32 +130,6 @@ export function useCrud<T extends object>(options: UseCrudOptions<T>) {
       okLoading.value = false
       return false
     }
-  }
-
-  /** 删除：弹确认框后调删除接口并刷新列表；id 缺省（且非 0）时静默返回，不弹确认框 */
-  function handleDelete(id: number | undefined, confirmOptions?: Partial<DialogOptions>) {
-    if (!id && id !== 0)
-      return
-    const d = $dialog.warning({
-      content: '确定删除？',
-      title: '提示',
-      positiveText: '确定',
-      negativeText: '取消',
-      async onPositiveClick() {
-        try {
-          d.loading = true
-          const data = await doDelete(id)
-          $message.success('删除成功')
-          d.loading = false
-          refresh(data, true)
-        }
-        catch (error) {
-          console.error(error)
-          d.loading = false
-        }
-      },
-      ...confirmOptions,
-    })
   }
 
   return {

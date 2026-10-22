@@ -21,10 +21,7 @@
         <n-select
           v-model:value="queryItems.enable"
           clearable
-          :options="[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
-          ]"
+          :options="ENABLE_OPTIONS"
         />
       </MeQueryItem>
     </MeCrud>
@@ -90,10 +87,12 @@
 // 角色管理页：MeCrud 表格维护角色（新增/编辑/删除/启停），编辑弹窗内用权限树勾选角色拥有的权限；
 // 超级管理员（SUPER_ADMIN）行禁用编辑/删除/启停，"分配用户"跳转到 role-user 子页
 import type { DataTableColumns } from 'naive-ui'
+import type { MeCrudExposed } from '@/types/me-components'
 import type { PermissionItem, Role, RoleQuery } from '@/types/models'
-import { NButton, NSwitch } from 'naive-ui'
+import { NButton } from 'naive-ui'
 import { MeCrud, MeModal, MeQueryItem } from '@/components'
-import { useCrud, useEnableRow, useRequest, useRouteQuery } from '@/composables'
+import { renderEnableSwitch, useCrud, useEnableRow, useRequest, useRouteQuery } from '@/composables'
+import { ENABLE_OPTIONS } from '@/types/models'
 import api from './api'
 
 defineOptions({ name: 'RoleMgt' })
@@ -105,7 +104,7 @@ type RoleRow = Role & { enableLoading?: boolean }
 // 弹窗表单：角色字段 + 分配权限时用的 permissionIds
 type RoleForm = Partial<RoleRow> & { permissionIds?: number[] }
 
-const $table = ref<{ handleSearch: (keepCurrentPage?: boolean) => void } | null>(null)
+const $table = ref<MeCrudExposed | null>(null)
 // 筛选条件经 useRouteQuery 同步到 URL，刷新/回退不丢
 const queryItems = useRouteQuery<RoleQuery>({ name: undefined, enable: undefined })
 
@@ -132,22 +131,7 @@ const columns: DataTableColumns<RoleRow> = [
   {
     title: '状态',
     key: 'enable',
-    render: row =>
-      h(
-        NSwitch,
-        {
-          size: 'small',
-          rubberBand: false,
-          value: row.enable,
-          loading: !!row.enableLoading,
-          disabled: row.code === 'SUPER_ADMIN',
-          onUpdateValue: () => handleEnable(row),
-        },
-        {
-          checked: () => '启用',
-          unchecked: () => '停用',
-        },
-      ),
+    render: row => renderEnableSwitch(row, handleEnable, {}, row.code === 'SUPER_ADMIN'),
   },
   {
     title: '操作',
@@ -205,14 +189,11 @@ const columns: DataTableColumns<RoleRow> = [
   },
 ]
 
-// 权限树数据走 useRequest 标准件：自带竞态防护与组件卸载自动取消
-// data 是请求标准件的事实源，permissionTree 是视图别名；过期/中止的响应到不了 data，也就不会写入树
-const permissionTree = ref<PermissionItem[]>([])
+// 权限树数据走 useRequest 标准件：自带竞态防护与组件卸载自动取消；
+// permissionTree 由请求结果直接派生（未返回时以空数组兜底），不再用 watch 手工搬运
 const { data: treeData, run: fetchPermissionTree } = useRequest<PermissionItem[]>(
   signal => api.getAllPermissionTree(signal).then(({ data = [] }) => data),
 )
-watch(treeData, (value) => {
-  permissionTree.value = value ?? []
-})
+const permissionTree = computed(() => treeData.value ?? [])
 fetchPermissionTree()
 </script>

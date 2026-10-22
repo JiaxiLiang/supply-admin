@@ -3,6 +3,8 @@
  * 从各页面抽走、在此收口为标准件，页面只经这一个入口取用
  */
 export * from './useCrud'
+export * from './useDelete'
+export * from './useEnableColumn'
 export * from './useEnableRow'
 export * from './useForm'
 export * from './useModal'

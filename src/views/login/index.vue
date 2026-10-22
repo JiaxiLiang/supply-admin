@@ -95,37 +95,6 @@
   </div>
 </template>
 
-<style>
-.login-bg {
-  background: #f7f7f7;
-}
-.dark .login-bg {
-  background: linear-gradient(125deg, #111815, #14201c 55%, #0f1513);
-}
-.login-btn {
-  background: linear-gradient(90deg, #23c891, #91e3c8) !important;
-  border: none !important;
-}
-.login-form > * {
-  animation: login-fade-up 0.5s ease both;
-}
-.login-form > *:nth-child(2) {
-  animation-delay: 0.08s;
-}
-.login-form > *:nth-child(3) {
-  animation-delay: 0.16s;
-}
-.login-form > *:nth-child(n + 4) {
-  animation-delay: 0.24s;
-}
-@keyframes login-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-}
-</style>
-
 <script setup lang="ts">
 // 登录页：表单校验 → 调用登录接口 → 存 token 到 authStore → 按 redirect 参数或默认路径跳转；
 // 支持"记住我"持久化账号密码、图形验证码（错误后自动刷新）与一键体验快捷登录
@@ -212,10 +181,10 @@ async function onLoginSuccess(data: LoginToken) {
   try {
     $message.success('登录成功', { key: 'login' })
     if (route.query.redirect) {
-      // redirect 由权限守卫以字符串路径写入，这里只回填其余 query
+      // redirect 由权限守卫以字符串路径写入，跳转时剥离该参数（拷贝 query，不改动 route 本身）
       const path = route.query.redirect as string
-      delete route.query.redirect
-      router.push({ path, query: route.query })
+      const { redirect: _redirect, ...query } = route.query
+      router.push({ path, query })
     }
     else {
       router.push('/')
@@ -227,3 +196,34 @@ async function onLoginSuccess(data: LoginToken) {
   }
 }
 </script>
+
+<style>
+.login-bg {
+  background: #f7f7f7;
+}
+.dark .login-bg {
+  background: linear-gradient(125deg, #111815, #14201c 55%, #0f1513);
+}
+.login-btn {
+  background: linear-gradient(90deg, #23c891, #91e3c8) !important;
+  border: none !important;
+}
+.login-form > * {
+  animation: login-fade-up 0.5s ease both;
+}
+.login-form > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.login-form > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.login-form > *:nth-child(n + 4) {
+  animation-delay: 0.24s;
+}
+@keyframes login-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+</style>
